@@ -45,26 +45,34 @@ class Lexer:
                 case ">":
                     if self.match("="):
                         self.add_token(kind=TokenKind.GREATER_THAN_EQUAL)
-                    else:
-                        self.add_token(kind=TokenKind.GREATER_THAN)
+                        continue
+
+                    self.add_token(kind=TokenKind.GREATER_THAN)
                 case "<":
                     if self.match("="):
                         self.add_token(kind=TokenKind.LESS_THAN_EQUAL)
-                    else:
-                        self.add_token(kind=TokenKind.LESS_THAN)
+                        continue
+
+                    self.add_token(kind=TokenKind.LESS_THAN)
                 case '"':
                     self.handle_string()
                 case "=":
                     if self.match("="):
                         self.add_token(kind=TokenKind.EQUAL_EQUAL)
-                    else:
-                        self.add_token(kind=TokenKind.EQUAL)
+                        continue
+
+                    self.add_token(kind=TokenKind.EQUAL)
                 case "!":
                     if self.match("="):
                         self.add_token(kind=TokenKind.NOT_EQUAL)
-                    else:
-                        self.add_token(kind=TokenKind.NOT)
+                        continue
+
+                    self.add_token(kind=TokenKind.NOT)
                 case "?":
+                    if self.match("?"):
+                        self.add_token(kind=TokenKind.NULLISH)
+                        continue
+
                     self.add_token(kind=TokenKind.QUESTION)
                 case ":":
                     self.add_token(kind=TokenKind.COLLON)
@@ -81,13 +89,16 @@ class Lexer:
                 case _:
                     if self.is_digit(lexeme):
                         self.handle_number()
-                    elif self.is_alpha(lexeme):
+                        continue
+
+                    if self.is_alpha(lexeme):
                         self.handle_identifier()
-                    else:
-                        raise NeoError(
-                            line=self.line,
-                            message=f"Unexpected Character '{lexeme}'",
-                        )
+                        continue
+
+                    raise NeoError(
+                        line=self.line,
+                        message=f"Unexpected Character '{lexeme}'",
+                    )
 
         self.add_token(kind=TokenKind.EOF)
         return self.tokens
