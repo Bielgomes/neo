@@ -89,7 +89,7 @@ class Token:
 
                 return str(self.literal)
             case TokenKind.STRING:
-                return self.literal
+                return f'"{self.literal}"'
             case TokenKind.NULL:
                 return "null"
 
