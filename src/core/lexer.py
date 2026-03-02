@@ -32,7 +32,6 @@ class Lexer:
                 case "/":
                     self.add_token(kind=TokenKind.SLASH)
                 case "#":
-                    print("entrou")
                     if self.match("/"):
                         while self.peak() != "/":
                             self.advance()

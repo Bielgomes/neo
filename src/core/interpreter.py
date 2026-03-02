@@ -15,8 +15,6 @@ class Interpreter(ExprVisitor, StmtVisitor):
         for statement in statements:
             self.execute(statement)
 
-        print("self.environment:", self.environment.environment)
-
     def visite_expr_stmt(self, stmt: "Stmt.ExprStmt") -> Any:
         return self.evaluate(stmt.expr)
 
