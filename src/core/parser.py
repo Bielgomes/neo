@@ -86,7 +86,7 @@ class Parser:
         return self.parse_assignment()
 
     def parse_assignment(self) -> Expr:
-        expr = self.parse_ternary()
+        expr = self.parse_nullish()
 
         if self.match([TokenKind.EQUAL]):
             equals = self.previous()
@@ -97,6 +97,16 @@ class Parser:
             raise NeoError(
                 token=equals, message="Invalid assignment target, expected variable"
             )
+
+        return expr
+
+    def parse_nullish(self) -> Expr:
+        expr = self.parse_ternary()
+
+        while self.match([TokenKind.NULLISH]):
+            operator = self.previous()
+            right = self.parse_ternary()
+            expr = Expr.BinaryExpr(operator=operator, left=expr, right=right)
 
         return expr
 

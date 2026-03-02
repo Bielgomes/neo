@@ -27,6 +27,7 @@ class TokenKind(Enum):
     AND = auto()
     OR = auto()
     NOT = auto()
+    NULLISH = auto()
 
     # Boolean
     TRUE = auto()
@@ -124,6 +125,8 @@ class Token:
                 return "or"
             case TokenKind.NOT:
                 return "!"
+            case TokenKind.NULLISH:
+                return "??"
 
             # Boolean
             case TokenKind.TRUE:

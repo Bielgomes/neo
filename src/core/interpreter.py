@@ -119,6 +119,11 @@ class Interpreter(ExprVisitor, StmtVisitor):
                 return self.is_truthy(left) and self.is_truthy(right)
             case TokenKind.OR:
                 return self.is_truthy(left) or self.is_truthy(right)
+            case TokenKind.NULLISH:
+                if left is not None:
+                    return left
+
+                return right
 
     def visite_ternary_expr(self, expr: "Expr.TernaryExpr") -> Any:
         condition = self.evaluate(expr.condition)
