@@ -87,8 +87,6 @@ class Interpreter(ExprVisitor, StmtVisitor):
                 self.check_number_operands(expr.operator, left, right)
                 return left / right
             case TokenKind.PLUS:
-                print("isinstance(left, str):", isinstance(left, str))
-                print("isinstance(left, str)", isinstance(left, str))
                 if isinstance(left, str) and isinstance(right, str):
                     return left + right
                 if isinstance(left, str) or isinstance(right, str):
