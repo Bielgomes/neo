@@ -34,6 +34,9 @@ class Lexer:
                 case "#":
                     if self.match("/"):
                         while self.peak() != "/":
+                            if self.peak() == "\n":
+                                self.line += 1
+
                             self.advance()
 
                         self.consume("/")
