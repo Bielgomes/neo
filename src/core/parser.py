@@ -51,7 +51,7 @@ class Parser:
 
         while not self.match([TokenKind.RBRACE]):
             if self.match([TokenKind.EOF]):
-                raise NeoError(token=self.peek().position.line, message="Expected '}'")
+                raise NeoError(line=self.peek().position.line, message="Expected '}'")
 
             stmt = self.statement()
             stmts.append(stmt)
@@ -95,7 +95,8 @@ class Parser:
                 return Expr.AssignExpr(identifier=expr.name, value=value)
 
             raise NeoError(
-                token=equals, message="Invalid assignment target, expected variable"
+                line=equals.position.line,
+                message="Invalid assignment target, expected variable",
             )
 
         return expr
@@ -227,7 +228,7 @@ class Parser:
             self.consume(kind=TokenKind.RPAREN, message="Expected )")
             return Expr.GroupingExpr(value=expr)
 
-        raise NeoError(token=self.peek(), message="Expected expression")
+        raise NeoError(line=self.peek().position.line, message="Expected expression")
 
     def is_at_end(self) -> bool:
         return self.peek().kind == TokenKind.EOF
