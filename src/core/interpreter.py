@@ -161,6 +161,10 @@ class Interpreter(ExprVisitor, StmtVisitor):
                 text = text.replace(".0", "")
             return text
 
+        if isinstance(value, bool):
+            text = str(value).lower()
+            return text
+
         return str(value)
 
     def is_truthy(self, value: Any) -> bool:
