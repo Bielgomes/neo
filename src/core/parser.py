@@ -16,13 +16,17 @@ class Parser:
         statments: List[Stmt] = []
 
         while not self.is_at_end():
-            statments.append(self.statement())
+            statments.append(self.declaration())
 
         return statments
 
-    def statement(self) -> Stmt:
+    def declaration(self) -> Stmt:
         if self.match([TokenKind.LET]):
             return self.let_declaration_statement()
+
+        return self.statement()
+
+    def statement(self) -> Stmt:
         if self.match([TokenKind.LBRACE]):
             return self.block_statement()
         if self.match([TokenKind.PRINT]):
@@ -115,7 +119,7 @@ class Parser:
         expr = self.parse_logicalor()
 
         if self.match([TokenKind.QUESTION]):
-            left = self.parse_expr()
+            left = self.parse_expression()
             self.consume(kind=TokenKind.COLLON, message="Expected ':'")
             right = self.parse_ternary()
 

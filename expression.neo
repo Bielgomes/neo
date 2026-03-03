@@ -1,10 +1,32 @@
 # 1 + 1 + 10.5 + 200.245 * 10 / 15 - 12
-let a = 10;
-print("Valor de a:" + " " + 10);
-a = 20;
 
 #/Comentário Multi-linha!
 Pois é
 /#
 
-let b = 10;
+if (null != null) {
+    print("Null");
+} else if ("a" == "a") {
+    print("'a' == 'a':");
+    print("a" == "a");
+
+    print("Nao eh null");
+}
+
+let aux = 10;
+print("Valor de aux: " + aux);
+aux = 20;
+
+let aux2;
+print("Valor de aux2: " + aux2);
+
+let ternary = 10 - 1 * 2 / 3 > 12 ? true : false;
+print(ternary);
+
+print(null ?? "default value for null");
+
+if (true != true and false == false and 10 > 10 or 10 < 10 or 1 >= 1 or !(5 <= 5)) {
+    print("wait...");
+} else {
+    print("Strange");
+}
