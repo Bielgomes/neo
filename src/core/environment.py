@@ -22,11 +22,20 @@ class Environment:
             return self.environment[name.lexeme]
 
         if self.parent_environment is not None:
-            return self.parent_environment.get_value(name.lexeme)
+            return self.parent_environment.get_value(name)
 
         raise NeoRuntimeError(
             token=name, message=f"'{name.lexeme}' not declared in this context"
         )
 
     def set_value(self, name: Token, value: Any) -> Any:
-        self.environment[name.lexeme] = value
+        if name.lexeme in self.environment:
+            self.environment[name.lexeme] = value
+            return value
+
+        if self.parent_environment is not None:
+            return self.parent_environment.set_value(name, value)
+
+        raise NeoRuntimeError(
+            token=name, message=f"'{name.lexeme}' not declared in this context"
+        )

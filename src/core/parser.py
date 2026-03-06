@@ -57,7 +57,7 @@ class Parser:
             if self.match([TokenKind.EOF]):
                 raise NeoError(line=self.peek().position.line, message="Expected '}'")
 
-            stmt = self.statement()
+            stmt = self.declaration()
             stmts.append(stmt)
 
         return Stmt.BlockStmt(stmts)
@@ -208,7 +208,7 @@ class Parser:
     def parse_unary(self):
         if self.match([TokenKind.NOT, TokenKind.MINUS]):
             operator = self.previous()
-            right = self.parse_primary()
+            right = self.parse_unary()
 
             return Expr.UnaryExpr(operator=operator, right=right)
 

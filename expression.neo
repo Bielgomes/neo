@@ -1,6 +1,7 @@
 # 1 + 1 + 10.5 + 200.245 * 10 / 15 - 12
 
-#/Comentário Multi-linha!
+#/
+Comentário Multi-linha!
 Pois é
 /#
 
@@ -9,8 +10,9 @@ if (null != null) {
 } else if ("a" == "a") {
     print("'a' == 'a':");
     print("a" == "a");
-
     print("Nao eh null");
+} else {
+    print("A");
 }
 
 let aux = 10;
@@ -29,4 +31,14 @@ if (true != true and false == false and 10 > 10 or 10 < 10 or 1 >= 1 or !(5 <= 5
     print("wait...");
 } else {
     print("Strange");
+}
+
+let scope = 10;
+
+{
+    print("Scope 'Global': " + scope);
+    scope = 30;
+
+    let scope = 20;
+    print("Scope 'Local': " + scope);
 }

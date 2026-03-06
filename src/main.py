@@ -10,8 +10,10 @@ from exceptions.neo_error_base import NeoErrorBase
 
 
 class NeoProgram:
-    @staticmethod
-    def run(source: str) -> None:
+    def __init__(self):
+        self.interpreter = Interpreter()
+
+    def run(self, source: str) -> None:
         try:
             lexer = Lexer(source)
             tokens = lexer.tokenize()
@@ -19,25 +21,25 @@ class NeoProgram:
             parser = Parser(tokens)
             statements = parser.parse()
 
-            Interpreter().interpret(statements)
+            self.interpreter.interpret(statements)
         except NeoErrorBase as err:
             print(err)
             return
 
-    @staticmethod
-    def run_file(path: str) -> None:
+    def run_file(self, path: str) -> None:
         with open(path) as script:
             source = script.read()
-            NeoProgram.run(source)
+            self.run(source)
 
-    @staticmethod
-    def prompt() -> None:
+    def prompt(self) -> None:
         while True:
             source = input("> ")
-            NeoProgram.run(source)
+            self.run(source)
 
 
 def main() -> None:
+    neoProgram = NeoProgram()
+
     if len(sys.argv) > 2:
         print("Run: python src/main.py [script]")
         return
@@ -51,10 +53,10 @@ def main() -> None:
             print(f"[Error]: File {sys.argv[1]} does not exists.")
             return
 
-        NeoProgram.run_file(sys.argv[1])
+        neoProgram.run_file(sys.argv[1])
         return
 
-    NeoProgram.prompt()
+    neoProgram.prompt()
 
 
 if __name__ == "__main__":

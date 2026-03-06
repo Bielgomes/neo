@@ -30,19 +30,14 @@ class Interpreter(ExprVisitor, StmtVisitor):
         print(self.stringfy(value))
 
     def visite_block_stmt(self, stmt: "Stmt.BlockStmt") -> None:
-        previous = self.environment
-
-        for stmt in stmt.stmts:
-            self.environment = Environment(parent_environment=previous)
-            self.execute(stmt)
-
-        self.environment = previous
+        new_environment = Environment(parent_environment=self.environment)
+        self.execute_block(stmt=stmt, environment=new_environment)
 
     def visite_if_stmt(self, stmt: "Stmt.IfStmt") -> None:
         condition = self.evaluate(stmt.condition)
         if self.is_truthy(condition):
             return self.execute(stmt.then_branch)
-        elif stmt.else_branch is not None and self.is_truthy(stmt.else_branch):
+        elif stmt.else_branch is not None:
             return self.execute(stmt.else_branch)
 
         return
@@ -138,6 +133,15 @@ class Interpreter(ExprVisitor, StmtVisitor):
     def execute(self, stmt: Stmt) -> None:
         stmt.accept(self)
 
+    def execute_block(self, stmt: Stmt, environment: Environment) -> None:
+        previous = self.environment
+        self.environment = environment
+
+        for stmt in stmt.stmts:
+            self.execute(stmt)
+
+        self.environment = previous
+
     def check_number_operand(self, operator: Token, operand: Any) -> bool:
         if isinstance(operand, (float, int)):
             return True
@@ -168,7 +172,7 @@ class Interpreter(ExprVisitor, StmtVisitor):
         return str(value)
 
     def is_truthy(self, value: Any) -> bool:
-        if value == "null":
+        if value is None:
             return False
 
         return bool(value)
