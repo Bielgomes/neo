@@ -5,32 +5,32 @@ from core.token import Token
 
 class ExprVisitor(ABC):
     @abstractmethod
-    def visite_literal_expr(self, expr: "Expr.LiteralExpr") -> Any: ...
+    def visite_literal_expr(self, expr: "Expr.Literal") -> Any: ...
 
     @abstractmethod
-    def visite_variable_expr(self, expr: "Expr.VariableExpr") -> Any: ...
+    def visite_variable_expr(self, expr: "Expr.Variable") -> Any: ...
 
     @abstractmethod
-    def visite_assign_expr(self, expr: "Expr.AssignExpr") -> Any: ...
+    def visite_assign_expr(self, expr: "Expr.Assign") -> Any: ...
 
     @abstractmethod
-    def visite_grouping_expr(self, expr: "Expr.GroupingExpr") -> Any: ...
+    def visite_grouping_expr(self, expr: "Expr.Grouping") -> Any: ...
 
     @abstractmethod
-    def visite_unary_expr(self, expr: "Expr.UnaryExpr") -> Any: ...
+    def visite_unary_expr(self, expr: "Expr.Unary") -> Any: ...
 
     @abstractmethod
-    def visite_binary_expr(self, expr: "Expr.BinaryExpr") -> Any: ...
+    def visite_binary_expr(self, expr: "Expr.Binary") -> Any: ...
 
     @abstractmethod
-    def visite_ternary_expr(self, expr: "Expr.TernaryExpr") -> Any: ...
+    def visite_ternary_expr(self, expr: "Expr.Ternary") -> Any: ...
 
 
 class Expr(ABC):
     @abstractmethod
     def accept(self, visitor: ExprVisitor) -> any: ...
 
-    class LiteralExpr:
+    class Literal:
         def __init__(self, value: any):
             self.value = value
 
@@ -44,7 +44,7 @@ class Expr(ABC):
         def accept(self, visitor: ExprVisitor) -> any:
             return visitor.visite_variable_expr(self)
 
-    class AssignExpr:
+    class Assign:
         def __init__(self, identifier: Token, value: "Expr"):
             self.identifier = identifier
             self.value = value
@@ -52,14 +52,14 @@ class Expr(ABC):
         def accept(self, visitor: ExprVisitor) -> any:
             return visitor.visite_assign_expr(self)
 
-    class GroupingExpr:
+    class Grouping:
         def __init__(self, value: "Expr"):
             self.value = value
 
         def accept(self, visitor: ExprVisitor) -> any:
             return visitor.visite_grouping_expr(self)
 
-    class UnaryExpr:
+    class Unary:
         def __init__(self, operator: Token, right: "Expr"):
             self.operator = operator
             self.right = right
@@ -67,7 +67,7 @@ class Expr(ABC):
         def accept(self, visitor: ExprVisitor) -> any:
             return visitor.visite_unary_expr(self)
 
-    class BinaryExpr:
+    class Binary:
         def __init__(
             self,
             operator: Token,
@@ -81,7 +81,7 @@ class Expr(ABC):
         def accept(self, visitor: ExprVisitor) -> any:
             return visitor.visite_binary_expr(self)
 
-    class TernaryExpr:
+    class Ternary:
         def __init__(
             self,
             condition: "Expr",

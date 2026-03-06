@@ -42,3 +42,18 @@ let scope = 10;
     let scope = 20;
     print("Scope 'Local': " + scope);
 }
+
+let counter = 0;
+
+while (counter < 5) {
+    print("while loop: " + (counter + 1));
+    counter = counter + 1;
+}
+
+for (let i = 0; i < 5; i = i + 1) {
+    print("for loop: " + (i + 1));
+}
+
+for (counter = 0; counter < 5; counter = counter + 1) {
+    print("for loop without let declaration: " + (counter + 1));
+}

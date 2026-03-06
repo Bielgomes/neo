@@ -42,6 +42,8 @@ class TokenKind(Enum):
     RPAREN = auto()
     LBRACE = auto()
     RBRACE = auto()
+    FOR = auto()
+    WHILE = auto()
     LET = auto()
     IF = auto()
     ELSE = auto()
@@ -50,6 +52,8 @@ class TokenKind(Enum):
 
 
 reserved_keywords_map = {
+    "for": TokenKind.FOR,
+    "while": TokenKind.WHILE,
     "let": TokenKind.LET,
     "if": TokenKind.IF,
     "else": TokenKind.ELSE,
@@ -151,6 +155,10 @@ class Token:
                 return "{"
             case TokenKind.RBRACE:
                 return "}"
+            case TokenKind.FOR:
+                return "for"
+            case TokenKind.WHILE:
+                return "while"
             case TokenKind.LET:
                 return "let"
             case TokenKind.IF:

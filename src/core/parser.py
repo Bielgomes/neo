@@ -13,12 +13,12 @@ class Parser:
         self.max_position = len(self.tokens)
 
     def parse(self) -> List[Stmt]:
-        statments: List[Stmt] = []
+        statements: List[Stmt] = []
 
         while not self.is_at_end():
-            statments.append(self.declaration())
+            statements.append(self.declaration())
 
-        return statments
+        return statements
 
     def declaration(self) -> Stmt:
         if self.match([TokenKind.LET]):
@@ -33,11 +33,62 @@ class Parser:
             return self.print_statement()
         if self.match([TokenKind.IF]):
             return self.if_statement()
+        if self.match([TokenKind.FOR]):
+            return self.for_statement()
+        if self.match([TokenKind.WHILE]):
+            return self.while_statement()
 
         return self.expression_statement()
 
+    def for_statement(self) -> Stmt:
+        self.consume(kind=TokenKind.LPAREN, message="Expected '(' after 'for'.")
+
+        initializer = None
+        if self.match([TokenKind.SEMICOLON]):
+            initializer = None
+        elif self.match([TokenKind.LET]):
+            initializer = self.let_declaration_statement()
+        else:
+            initializer = self.expression_statement()
+
+        condition = None
+        if not self.check(TokenKind.SEMICOLON):
+            condition = self.parse_expression()
+
+        self.consume(
+            kind=TokenKind.SEMICOLON, message="Expected ';' after loop condition."
+        )
+
+        increment = None
+        if not self.check(TokenKind.RPAREN):
+            increment = self.parse_expression()
+
+        self.consume(
+            kind=TokenKind.RPAREN, message="Expected ')' after loop increment."
+        )
+
+        body = self.declaration()
+        if increment is not None:
+            body = Stmt.Block([body, increment])
+
+        condition = condition if condition is not None else Expr.Literal(True)
+        body = Stmt.While(condition=condition, body=body)
+
+        if initializer is not None:
+            body = Stmt.Block([initializer, body])
+
+        return body
+
+    def while_statement(self) -> Stmt:
+        self.consume(kind=TokenKind.LPAREN, message="Expected '(' after 'while'")
+        condition = self.parse_expression()
+        self.consume(kind=TokenKind.RPAREN, message="Expected ')'")
+        body = self.declaration()
+
+        return Stmt.While(condition=condition, body=body)
+
     def if_statement(self) -> Stmt:
-        self.consume(kind=TokenKind.LPAREN, message="Expected '('")
+        self.consume(kind=TokenKind.LPAREN, message="Expected '(' after 'if'")
         condition = self.parse_expression()
         self.consume(kind=TokenKind.RPAREN, message="Expected ')'")
         than_branch = self.statement()
@@ -46,7 +97,7 @@ class Parser:
         if self.match([TokenKind.ELSE]):
             else_branch = self.statement()
 
-        return Stmt.IfStmt(
+        return Stmt.If(
             condition=condition, then_branch=than_branch, else_branch=else_branch
         )
 
@@ -60,14 +111,14 @@ class Parser:
             stmt = self.declaration()
             stmts.append(stmt)
 
-        return Stmt.BlockStmt(stmts)
+        return Stmt.Block(stmts)
 
     def print_statement(self) -> Stmt:
-        self.consume(kind=TokenKind.LPAREN, message="Expected '('")
+        self.consume(kind=TokenKind.LPAREN, message="Expected '(' after 'print'")
         expr = self.parse_expression()
         self.consume(kind=TokenKind.RPAREN, message="Expected ')'")
         self.consume(kind=TokenKind.SEMICOLON, message="Expected ';'")
-        return Stmt.PrintStmt(expr)
+        return Stmt.Print(expr)
 
     def let_declaration_statement(self) -> Stmt:
         identifier = self.consume(
@@ -79,12 +130,12 @@ class Parser:
             expr = self.parse_expression()
 
         self.consume(kind=TokenKind.SEMICOLON, message="Expected ';'")
-        return Stmt.LetDeclStmt(identifier=identifier, expr=expr)
+        return Stmt.LetDecl(identifier=identifier, expr=expr)
 
     def expression_statement(self) -> Stmt:
         expr = self.parse_expression()
         self.consume(kind=TokenKind.SEMICOLON, message="Expected ';'")
-        return Stmt.ExprStmt(expr)
+        return Stmt.Expr(expr)
 
     def parse_expression(self) -> Expr:
         return self.parse_assignment()
@@ -96,7 +147,7 @@ class Parser:
             equals = self.previous()
             value = self.parse_assignment()
             if isinstance(expr, Expr.Variable):
-                return Expr.AssignExpr(identifier=expr.name, value=value)
+                return Expr.Assign(identifier=expr.name, value=value)
 
             raise NeoError(
                 line=equals.position.line,
@@ -111,7 +162,7 @@ class Parser:
         while self.match([TokenKind.NULLISH]):
             operator = self.previous()
             right = self.parse_ternary()
-            expr = Expr.BinaryExpr(operator=operator, left=expr, right=right)
+            expr = Expr.Binary(operator=operator, left=expr, right=right)
 
         return expr
 
@@ -123,7 +174,7 @@ class Parser:
             self.consume(kind=TokenKind.COLLON, message="Expected ':'")
             right = self.parse_ternary()
 
-            expr = Expr.TernaryExpr(condition=expr, left=left, right=right)
+            expr = Expr.Ternary(condition=expr, left=left, right=right)
 
         return expr
 
@@ -134,7 +185,7 @@ class Parser:
             operator = self.previous()
             right = self.parse_logicaland()
 
-            expr = Expr.BinaryExpr(operator=operator, left=expr, right=right)
+            expr = Expr.Binary(operator=operator, left=expr, right=right)
 
         return expr
 
@@ -145,7 +196,7 @@ class Parser:
             operator = self.previous()
             right = self.parse_equality()
 
-            expr = Expr.BinaryExpr(operator=operator, left=expr, right=right)
+            expr = Expr.Binary(operator=operator, left=expr, right=right)
 
         return expr
 
@@ -161,7 +212,7 @@ class Parser:
             operator = self.previous()
             right = self.parse_comparison()
 
-            expr = Expr.BinaryExpr(operator=operator, left=expr, right=right)
+            expr = Expr.Binary(operator=operator, left=expr, right=right)
 
         return expr
 
@@ -179,7 +230,7 @@ class Parser:
             operator = self.previous()
             right = self.parse_factor()
 
-            expr = Expr.BinaryExpr(operator=operator, left=expr, right=right)
+            expr = Expr.Binary(operator=operator, left=expr, right=right)
 
         return expr
 
@@ -190,7 +241,7 @@ class Parser:
             operator = self.previous()
             right = self.parse_factor()
 
-            expr = Expr.BinaryExpr(operator=operator, left=expr, right=right)
+            expr = Expr.Binary(operator=operator, left=expr, right=right)
 
         return expr
 
@@ -201,37 +252,38 @@ class Parser:
             operator = self.previous()
             right = self.parse_unary()
 
-            expr = Expr.BinaryExpr(operator=operator, left=expr, right=right)
+            expr = Expr.Binary(operator=operator, left=expr, right=right)
 
         return expr
 
     def parse_unary(self):
         if self.match([TokenKind.NOT, TokenKind.MINUS]):
             operator = self.previous()
-            right = self.parse_unary()
+            right = self.parse_primary()
 
-            return Expr.UnaryExpr(operator=operator, right=right)
+            return Expr.Unary(operator=operator, right=right)
 
         return self.parse_primary()
 
     def parse_primary(self):
         if self.match([TokenKind.TRUE]):
-            return Expr.LiteralExpr(True)
+            return Expr.Literal(True)
         if self.match([TokenKind.FALSE]):
-            return Expr.LiteralExpr(False)
+            return Expr.Literal(False)
         if self.match([TokenKind.NULL]):
-            return Expr.LiteralExpr(None)
+            return Expr.Literal(None)
         if self.match([TokenKind.IDENTIFIER]):
             return Expr.Variable(self.previous())
 
         if self.match([TokenKind.NUMBER, TokenKind.STRING]):
-            return Expr.LiteralExpr(self.previous().literal)
+            return Expr.Literal(self.previous().literal)
 
         if self.match([TokenKind.LPAREN]):
             expr = self.parse_expression()
             self.consume(kind=TokenKind.RPAREN, message="Expected )")
-            return Expr.GroupingExpr(value=expr)
+            return Expr.Grouping(value=expr)
 
+        print("self.peek():", self.peek().kind)
         raise NeoError(line=self.peek().position.line, message="Expected expression")
 
     def is_at_end(self) -> bool:

@@ -40,7 +40,9 @@ class Interpreter(ExprVisitor, StmtVisitor):
         elif stmt.else_branch is not None:
             return self.execute(stmt.else_branch)
 
-        return
+    def visite_while_stmt(self, stmt: "Stmt.WhileStmt"):
+        while self.is_truthy(self.evaluate(stmt.condition)):
+            self.execute(stmt=stmt.body)
 
     def visite_literal_expr(self, expr: "Expr.LiteralExpr") -> Any:
         return expr.value

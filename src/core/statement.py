@@ -7,33 +7,36 @@ from core.token import Token
 
 class StmtVisitor(ABC):
     @abstractmethod
-    def visite_expr_stmt(self, stmt: "Stmt.ExprStmt") -> Any: ...
+    def visite_expr_stmt(self, stmt: "Stmt.Expr") -> Any: ...
 
     @abstractmethod
-    def visite_let_decl_stmt(self, stmt: "Stmt.LetDeclStmt") -> None: ...
+    def visite_let_decl_stmt(self, stmt: "Stmt.LetDecl") -> None: ...
 
     @abstractmethod
-    def visite_print_stmt(self, stmt: "Stmt.PrintStmt") -> None: ...
+    def visite_print_stmt(self, stmt: "Stmt.Print") -> None: ...
 
     @abstractmethod
-    def visite_block_stmt(self, stmt: "Stmt.BlockStmt") -> None: ...
+    def visite_block_stmt(self, stmt: "Stmt.Block") -> None: ...
 
     @abstractmethod
-    def visite_if_stmt(self, stmt: "Stmt.IfStmt") -> None: ...
+    def visite_if_stmt(self, stmt: "Stmt.If") -> None: ...
+
+    @abstractmethod
+    def visite_while_stmt(self, stmt: "Stmt.While") -> None: ...
 
 
 class Stmt(ABC):
     @abstractmethod
     def accept(self, visitor: StmtVisitor) -> Any: ...
 
-    class ExprStmt:
+    class Expr:
         def __init__(self, expr: Expr) -> None:
             self.expr = expr
 
         def accept(self, visitor: StmtVisitor) -> Any:
             return visitor.visite_expr_stmt(self)
 
-    class LetDeclStmt:
+    class LetDecl:
         def __init__(self, identifier: Token, expr: Expr) -> None:
             self.identifier = identifier
             self.expr = expr
@@ -41,21 +44,21 @@ class Stmt(ABC):
         def accept(self, visitor: StmtVisitor) -> None:
             visitor.visite_let_decl_stmt(self)
 
-    class PrintStmt:
+    class Print:
         def __init__(self, expr: Expr) -> None:
             self.expr = expr
 
         def accept(self, visitor: StmtVisitor) -> None:
             visitor.visite_print_stmt(self)
 
-    class BlockStmt:
+    class Block:
         def __init__(self, stmts: List["Stmt"]) -> None:
             self.stmts = stmts
 
         def accept(self, visitor: StmtVisitor) -> None:
             return visitor.visite_block_stmt(self)
 
-    class IfStmt:
+    class If:
         def __init__(
             self,
             condition: Expr,
@@ -68,3 +71,15 @@ class Stmt(ABC):
 
         def accept(self, visitor: StmtVisitor) -> None:
             return visitor.visite_if_stmt(self)
+
+    class While:
+        def __init__(
+            self,
+            condition: Expr,
+            body: "Stmt",
+        ):
+            self.condition = condition
+            self.body = body
+
+        def accept(self, visitor: StmtVisitor) -> None:
+            return visitor.visite_while_stmt(self)
