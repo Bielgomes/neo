@@ -1,3 +1,5 @@
+let startTime = timeCounter();
+
 # 1 + 1 + 10.5 + 200.245 * 10 / 15 - 12
 
 #/
@@ -57,3 +59,13 @@ for (let i = 0; i < 5; i = i + 1) {
 for (counter = 0; counter < 5; counter = counter + 1) {
     print("for loop without let declaration: " + (counter + 1));
 }
+
+fn teste(x, y) {
+    print("X: " + x);
+    print("Y: " + y);
+}
+
+teste(10, 20);
+
+let endTime = timeCounter();
+print("Elapsed time: " + (endTime - startTime) + "s");

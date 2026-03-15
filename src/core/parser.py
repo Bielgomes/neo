@@ -23,6 +23,8 @@ class Parser:
     def declaration(self) -> Stmt:
         if self.match([TokenKind.LET]):
             return self.let_declaration_statement()
+        if self.match([TokenKind.FN]):
+            return self.fn_statement()
 
         return self.statement()
 
@@ -86,6 +88,34 @@ class Parser:
         body = self.declaration()
 
         return Stmt.While(condition=condition, body=body)
+
+    def fn_statement(self) -> Stmt:
+        name = self.consume(kind=TokenKind.IDENTIFIER, message="Expected function name")
+        self.consume(kind=TokenKind.LPAREN, message="Expected '(' after 'function'")
+
+        parameters = []
+
+        if not self.check(kind=TokenKind.RPAREN):
+            while True:
+                if len(parameters) > 255:
+                    raise NeoError(
+                        line=self.peek().position.line,
+                        message="Can't have more than 255 parameters",
+                    )
+
+                parameters.append(
+                    self.consume(kind=TokenKind.IDENTIFIER, message="Expected argument")
+                )
+
+                if self.match([TokenKind.COMMA]):
+                    continue
+
+                break
+
+        self.consume(kind=TokenKind.RPAREN, message="Expected ')'")
+        self.consume(kind=TokenKind.LBRACE, message="Expected '{' before function body")
+        body: Stmt.Block = self.block_statement()
+        return Stmt.Function(name=name, parameters=parameters, body=body)
 
     def if_statement(self) -> Stmt:
         self.consume(kind=TokenKind.LPAREN, message="Expected '(' after 'if'")
@@ -263,9 +293,42 @@ class Parser:
 
             return Expr.Unary(operator=operator, right=right)
 
-        return self.parse_primary()
+        return self.parse_call()
 
-    def parse_primary(self):
+    def parse_call(self) -> Expr:
+        expr = self.parse_primary()
+
+        while True:
+            if self.match([TokenKind.LPAREN]):
+                expr = self.finish_call(expr)
+                continue
+
+            break
+
+        return expr
+
+    def finish_call(self, calle: Expr) -> Expr:
+        paren = self.previous()
+
+        arguments = []
+        while True:
+            if self.check(kind=TokenKind.RPAREN):
+                break
+
+            if len(arguments) > 255:
+                raise NeoError(
+                    line=self.peek().position.line,
+                    message="Can't have more than 255 arguments",
+                )
+
+            arguments.append(self.parse_expression())
+            if self.match([TokenKind.COMMA]):
+                continue
+
+        self.consume(kind=TokenKind.RPAREN, message="Expected ')' after call")
+        return Expr.Call(calle=calle, paren=paren, arguments=arguments)
+
+    def parse_primary(self) -> Expr:
         if self.match([TokenKind.TRUE]):
             return Expr.Literal(True)
         if self.match([TokenKind.FALSE]):
@@ -283,7 +346,6 @@ class Parser:
             self.consume(kind=TokenKind.RPAREN, message="Expected )")
             return Expr.Grouping(value=expr)
 
-        print("self.peek():", self.peek().kind)
         raise NeoError(line=self.peek().position.line, message="Expected expression")
 
     def is_at_end(self) -> bool:

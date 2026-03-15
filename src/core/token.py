@@ -36,12 +36,14 @@ class TokenKind(Enum):
     # Special
     EQUAL = auto()
     COLLON = auto()
-    QUESTION = auto()
     SEMICOLON = auto()
+    QUESTION = auto()
+    COMMA = auto()
     LPAREN = auto()
     RPAREN = auto()
     LBRACE = auto()
     RBRACE = auto()
+    FN = auto()
     FOR = auto()
     WHILE = auto()
     LET = auto()
@@ -52,6 +54,7 @@ class TokenKind(Enum):
 
 
 reserved_keywords_map = {
+    "fn": TokenKind.FN,
     "for": TokenKind.FOR,
     "while": TokenKind.WHILE,
     "let": TokenKind.LET,
@@ -138,15 +141,17 @@ class Token:
             case TokenKind.FALSE:
                 return "false"
 
-            # EOF
+            # Special
             case TokenKind.EQUAL:
                 return "="
             case TokenKind.COLLON:
                 return ":"
-            case TokenKind.QUESTION:
-                return "?"
             case TokenKind.SEMICOLON:
                 return ";"
+            case TokenKind.QUESTION:
+                return "?"
+            case TokenKind.COMMA:
+                return ","
             case TokenKind.LPAREN:
                 return "("
             case TokenKind.RPAREN:
@@ -155,6 +160,8 @@ class Token:
                 return "{"
             case TokenKind.RBRACE:
                 return "}"
+            case TokenKind.FN:
+                return "fn"
             case TokenKind.FOR:
                 return "for"
             case TokenKind.WHILE:

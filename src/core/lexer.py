@@ -31,6 +31,8 @@ class Lexer:
                     self.add_token(kind=TokenKind.STAR)
                 case "/":
                     self.add_token(kind=TokenKind.SLASH)
+                case ",":
+                    self.add_token(kind=TokenKind.COMMA)
                 case "#":
                     if self.match("/"):
                         while self.peak() != "/":

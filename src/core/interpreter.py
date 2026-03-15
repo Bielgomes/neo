@@ -2,6 +2,9 @@ from typing import Any
 
 from core.environment import Environment
 from core.expression import Expr, ExprVisitor
+from core.globals.global_environment import GlobalEnvironment
+from core.neo_callable import NeoCallable
+from core.neo_function import NeoFunction
 from core.statement import Stmt, StmtVisitor
 from core.token import Token, TokenKind
 from exceptions.neo_runtime_error import NeoRuntimeError
@@ -9,7 +12,7 @@ from exceptions.neo_runtime_error import NeoRuntimeError
 
 class Interpreter(ExprVisitor, StmtVisitor):
     def __init__(self):
-        self.environment = Environment()
+        self.environment = GlobalEnvironment()
 
     def interpret(self, statements: Stmt):
         for statement in statements:
@@ -39,6 +42,32 @@ class Interpreter(ExprVisitor, StmtVisitor):
             return self.execute(stmt.then_branch)
         elif stmt.else_branch is not None:
             return self.execute(stmt.else_branch)
+
+    def visite_call_expr(self, expr: "Expr.Call"):
+        calle = self.evaluate(expr.calle)
+
+        if not isinstance(calle, NeoCallable):
+            raise NeoRuntimeError(
+                token=self.calle, message=f"{calle.name} is not callable"
+            )
+
+        arguments = []
+        for argument in expr.arguments:
+            arguments.append(self.evaluate(argument))
+
+        calle: NeoFunction = calle
+
+        if len(arguments) != calle.arity:
+            raise NeoRuntimeError(
+                token=expr.paren,
+                message=f"{calle.declaration.name.lexeme} expects {calle.arity} argument(s), but got {len(arguments)}",
+            )
+
+        return calle.call(interpreter=self, arguments=arguments)
+
+    def visite_fn_stmt(self, stmt: "Stmt.Function") -> None:
+        function = NeoFunction(declaration=stmt)
+        self.environment.declare(stmt.name, function)
 
     def visite_while_stmt(self, stmt: "Stmt.WhileStmt"):
         while self.is_truthy(self.evaluate(stmt.condition)):

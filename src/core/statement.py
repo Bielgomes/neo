@@ -24,6 +24,9 @@ class StmtVisitor(ABC):
     @abstractmethod
     def visite_while_stmt(self, stmt: "Stmt.While") -> None: ...
 
+    @abstractmethod
+    def visite_fn_stmt(self, stmt: "Stmt.Function") -> None: ...
+
 
 class Stmt(ABC):
     @abstractmethod
@@ -83,3 +86,12 @@ class Stmt(ABC):
 
         def accept(self, visitor: StmtVisitor) -> None:
             return visitor.visite_while_stmt(self)
+
+    class Function:
+        def __init__(self, name: Token, parameters: List[Token], body: "Stmt"):
+            self.name = name
+            self.parameters = parameters
+            self.body = body
+
+        def accept(self, visitor: StmtVisitor) -> None:
+            return visitor.visite_fn_stmt(self)
